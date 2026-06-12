@@ -1,26 +1,27 @@
-from db import admin_col, clienti_col, inventario_col, vendite_col
-from amministratore import Amministratore
-from articolo import Articolo
-from cliente import Cliente
 
-ARTICOLO_NON_TROVATO = "Articolo non trovato"
+from db import admin_col, clienti_col, inventario_col, vendite_col # importa le collezioni del database per amministratori, clienti, inventario e vendite   
+from amministratore import Amministratore # importa la classe Amministratore    
+from articolo import Articolo # importa la classe Articolo  
+from cliente import Cliente # importa la classe Cliente
+
+ARTICOLO_NON_TROVATO = "Articolo non trovato" # costante per il messaggio di articolo non trovato   
 
 class Negozio:
 
-    def _stampa_tabella(self, intestazioni, righe):
-        larghezze = [len(str(intestazione)) for intestazione in intestazioni]
+    def _stampa_tabella(self, intestazioni, righe): # metodo privato per stampare una tabella formattata con intestazioni e righe di dati   
+        larghezze = [len(str(intestazione)) for intestazione in intestazioni] # calcola la larghezza di ogni colonna basata sulla lunghezza delle intestazioni  
 
-        for riga in righe:
-            for indice, valore in enumerate(riga):
-                larghezze[indice] = max(larghezze[indice], len(str(valore)))
+        for riga in righe: # itera su ogni riga di dati e aggiorna la larghezza di ogni colonna se necessario per adattarsi ai dati presenti    
+            for indice, valore in enumerate(riga): # itera su ogni valore nella riga e aggiorna la larghezza della colonna corrispondente se il valore è più lungo dell'intestazione    
+                larghezze[indice] = max(larghezze[indice], len(str(valore))) # aggiorna la larghezza della colonna se il valore è più lungo dell'intestazione   
 
-        def formatta_riga(valori):
-            parti = []
-            for indice, valore in enumerate(valori):
-                parti.append(str(valore).ljust(larghezze[indice]))
-            return " | ".join(parti)
+        def formatta_riga(valori): # funzione interna per formattare una riga di dati in base alle larghezze calcolate per ogni colonna 
+            parti = [] # lista per le parti formattate della riga   
+            for indice, valore in enumerate(valori): # itera su ogni valore nella riga e formatta il valore in base alla larghezza della colonna corrispondente     
+                parti.append(str(valore).ljust(larghezze[indice])) # formatta il valore a sinistra e aggiunge spazi per adattarsi alla larghezza della colonna          return " | ".join(parti) # unisce le parti formattate con un separatore " | " e restituisce la riga formattata          
+            return " | ".join(parti) # unisce le parti formattate con un separatore " | " e restituisce la riga formattata      
 
-        separatore = "-+-".join("-" * larghezza for larghezza in larghezze)
+        separatore = "-+-".join("-" * larghezza for larghezza in larghezze) # crea una stringa di separazione basata sulle larghezze delle colonne, con un separatore " -+- " tra le colonne        print(formatta_riga(intestazioni)) # stampa la riga delle intestazioni formattata        print(separatore) # stampa la riga di separazione      for riga in righe: # itera su ogni riga di dati e stampa la riga formattata     print(formatta_riga(riga)) # stampa la riga formattata              
 
         print(formatta_riga(intestazioni))
         print(separatore)
@@ -29,20 +30,20 @@ class Negozio:
             print(formatta_riga(riga))
 
     # ---------- CLIENTI ----------
-    def registra_cliente(self, u, p):
-        if clienti_col.find_one({"username": u}):
+    def registra_cliente(self, u, p): # registra un nuovo cliente con username e password, controllando se il cliente esiste già nel database e inserendo un nuovo documento nella collezione clienti se il cliente non esiste già      
+        if clienti_col.find_one({"username": u}): # controlla se esiste già un cliente con lo stesso username nel database, se sì, stampa un messaggio di errore e ritorna senza registrare il cliente  
             print("Cliente già esistente")
             return
 
-        clienti_col.insert_one({
+        clienti_col.insert_one({ # inserisce un nuovo documento nella collezione clienti con i campi username e password per registrare il nuovo cliente nel database   
             "username": u,
             "password": p
         })
 
         print("Cliente registrato")
 
-    def login_cliente(self, u, p):
-        data = clienti_col.find_one({"username": u, "password": p})
+    def login_cliente(self, u, p): # effettua il login di un cliente controllando se esiste un documento nella collezione clienti con lo username e la password forniti, se sì, restituisce un'istanza della classe Cliente con le credenziali del cliente, altrimenti restituisce None         
+        data = clienti_col.find_one({"username": u, "password": p}) # cerca un documento nella collezione clienti che corrisponda allo username e alla password forniti, se trova una corrispondenza, restituisce un'istanza della classe Cliente con le credenziali del cliente, altrimenti restituisce None   
         if data:
             return Cliente(u, p)
         return None
